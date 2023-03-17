@@ -1,4 +1,5 @@
-# jpgbeauty
+# gltfbeauty
 
-https://code4fukui.github.io/jpgbeauty/
+- https://code4fukui.github.io/gltfbeauty/
+
 
