@@ -23,46 +23,70 @@ const resizeImage = async (imgbin, imgw, imgq, imgc = "srgb") => {
   return data;
 };
 
-A: for (;;) {
-  divmain.innerHTML = "GLTF/GLBファイルをドロップしてください / drop GLTF/GLB here";
-  const items = await waitDropFiles(divmain);
-  const files = [];
-  for (const item of items) {
-    // console.log(item.type); // ignore item.type in Windows
-    const name = item.file.name;
-    if (!name.endsWith(".gltf") && !name.endsWith(".glb")) {
-      alert("ファイル形式が違います。GLTFファイルまたはGLBファイルをドロップしてください\nnot GLBTF/GLB");
-      continue A;
-    }
-    try {
-      const file = item.file;
-      const bin = new Uint8Array(await readAsArrayBufferAsync(file));
-      const gltfmode = name.endsWith(".gltf");
-      const gltf = gltfmode ? GLTF.parse(bin) : await GLB.decode(bin);
-      console.log(gltf)
-
-      const img = GLTF.getTexture(gltf);
-      const imgw = imgwidth.value;
-      const imgq = imgquality.value;
-      const imgc = imgsrgb.checked ? "srgb" : "display-p3";
-      const img2 = await resizeImage(img, imgw, imgq, imgc);
-      GLTF.setTexture(gltf, img2);
-
-      const data = gltfmode || outgltf.checked ? GLTF.stringify(gltf) : await GLB.encode(gltf);
-      const name2 = outgltf.checked ? name.substring(0, name.length - 3) + "gltf" : name;
-      files.push({ name: name2, data });
-    } catch (e) {
-      console.log(e);
-      alert(`GLTF/GLBファイル"${item.file.name}"の読み込みや変換に失敗しました。データが正常かご確認ください\nerror in the process: ${e}` );
-      continue A;
-    }
+const processFile = async (file) => {
+  if (!file.name.endsWith(".gltf") && !file.name.endsWith(".glb")) {
+    alert("ファイル形式が違います。GLTFファイルまたはGLBファイルを選択してください\nnot GLBTF/GLB");
+    return null;
   }
-  if (files.length == 1) {
-    downloadFile(files[0].name, files[0].data);
-  } else {
-    downloadZip("gltfs.zip", files);
+  try {
+    const bin = new Uint8Array(await readAsArrayBufferAsync(file));
+    const gltfmode = file.name.endsWith(".gltf");
+    const gltf = gltfmode ? GLTF.parse(bin) : await GLB.decode(bin);
+    console.log(gltf)
+
+    const img = GLTF.getTexture(gltf);
+    const imgw = imgwidth.value;
+    const imgq = imgquality.value;
+    const imgc = imgsrgb.checked ? "srgb" : "display-p3";
+    const img2 = await resizeImage(img, imgw, imgq, imgc);
+    GLTF.setTexture(gltf, img2);
+
+
+    const data = gltfmode || outgltf.checked ? GLTF.stringify(gltf) : await GLB.encode(gltf);
+    // const name2 = outgltf.checked ? name.substring(0, name.length - 3) + "gltf" : name;
+    const name2 = outgltf.checked ? file.name.replace(/\.\w+$/, ".gltf") : file.name;
+    return { name: name2, data };
+
+  } catch (e) {
+    console.log(e);
+    alert(`GLTF/GLBファイル"${file.name}"の読み込みや変換に失敗しました。データが正常かご確認ください\nerror in the process: ${e}` );
   }
 }
+
+document.addEventListener("DOMContentLoaded", () => {
+  fileInput.addEventListener("input", async (evt) => {
+    if (evt.target.files.length > 0) {
+      const files = [];
+      for (const file of evt.target.files) {
+        const result = await processFile(file);
+        if (result) files.push(result);
+      }
+      if (files.length == 1) {
+        downloadFile(files[0].name, files[0].data);
+      } else if (files.length > 1) {
+        downloadZip("gltfs.zip", files);
+      }
+      evt.target.value = null;
+    }
+  });
+
+  (async () => {
+    for (;;) {
+      divmain.innerHTML = "GLTF/GLBファイルをドロップしてください / drop GLTF/GLB here";
+      const items = await waitDropFiles(divmain);
+      const files = [];
+      for (const item of items) {
+        const result = await processFile(item.file);
+        if (result) files.push(result);
+      }
+      if (files.length == 1) {
+        downloadFile(files[0].name, files[0].data);
+      } else if (files.length > 1) {
+        downloadZip("gltfs.zip", files);
+      }
+    }
+  })();
+});
 </script>
 </head>
 <body>
@@ -76,7 +100,15 @@ A: for (;;) {
 </div>
 
 <div class="mx-5">
-  <div id="divmain" class="border px-5 mx-auto pt-3 pb-3"></div>
+  <div id="divmain" class="border px-5 mx-auto pt-3 pb-3"></div><br>
+<!--   <div class="mb-3">
+    またはファイルを選択: <input type="file" id="fileInput" accept=".gltf,.glb" multiple>
+  </div> -->
+<div class="mb-3">
+  またはGLTF/GLBファイルを選択してください / or select GLTF/GLB: <label for="fileInput" class="btn btn-outline-primary">ファイルを選択</label>
+  <input type="file" id="fileInput" accept=".gltf,.glb" multiple style="display: none;">
+  <span id="filename" class="ml-2 text-muted"></span>
+</div>
   テクスチャーサイズ / texture size(px): <select id="imgwidth" class="m-3"><option>8192</option><option>4096</option><option>2048</option><option selected>1024</option><option>512</option><option>256</option></select><br>
   品質 / quality(0-1.0): <input type="text" id="imgquality" class="m-3" value="0.9"><br>
   強制sRGB / force sRGB: <input type="checkbox" id="imgsrgb" class="m-3"><br>
@@ -85,10 +117,25 @@ A: for (;;) {
 
 <footer class="text-muted">
   <div class="container my-4 mx-0">
-  <p>Design: <a href="https://getbootstrap.com/">Bootstrap</a> by <a href="https://twitter.com/mdo">@mdo</a></p>
-  <p>Lib: MIT <a href="https://github.com/code4fukui/GLTF/">utils for GLTF/GLB</a><br>
-  <p>App: CC BY <a href="https://fukuno.jig.jp/3435">福野泰介の一日一創</a> by <a href="https://twitter.com/taisukef">@taisukef</a> (<a href=https://github.com/code4fukui/gltfbeauty/>src on GitHub</a>)</p>
-  <p>Related: <a href=https://code4sabae.github.io/csvbeauty/>csvbeauty</a>, <a href=https://code4fukui.github.io/txtbeauty/>txtbeauty</a>, <a href=https://code4fukui.github.io/jpgbeauty/>jpgbeauty</a></p>
+    <p>Design:
+      <a href="https://getbootstrap.com/">Bootstrap</a> by <a href="https://twitter.com/mdo">@mdo</a>
+    </p>
+    <p>Lib: MIT
+      <a href="https://github.com/code4fukui/GLTF/">utils for GLTF/GLB</a>
+    </p>
+    <p>App: CC BY
+      <a href="https://fukuno.jig.jp/3435">福野泰介の一日一創</a>
+      by <a href="https://twitter.com/taisukef">@taisukef</a> 
+      (<a href="https://github.com/code4fukui/gltfbeauty/">GitHub</a>)
+     </p>
+    </p>Contributer:
+      <a href=https://github.com/nknhb966>@nknhb966</a>
+    </p>
+    <p>Related:
+      <a href=https://code4sabae.github.io/csvbeauty/>csvbeauty</a>,
+      <a href=https://code4fukui.github.io/txtbeauty/>txtbeauty</a>,
+      <a href=https://code4fukui.github.io/jpgbeauty/>jpgbeauty</a>
+    </p>
   </div>
 </footer>
 
