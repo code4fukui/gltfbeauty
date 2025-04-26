@@ -1,6 +1,8 @@
 # gltfbeauty
 
-This project is a fork of [code4fukui/gltfbeauty](https://github.com/code4fukui/gltfbeauty), modified under the terms of the [MIT License](https://opensource.org/licenses/MIT).
+[gltfbeauty](https://code4fukui.github.io/gltfbeauty/) is a tool to shlink the image size in the GLTF/GLB files to publish web (supports multiple files, no upload)
+
+[gltfbeauty](https://code4fukui.github.io/gltfbeauty/)は、大きなGLTF/GLBファイルをウェブ公開用に縮小するツールです（まとめて変換対応、サーバーに送信されません）
 
 ## License
 
