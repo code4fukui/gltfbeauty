@@ -1,22 +1,20 @@
 # gltfbeauty
 
-[gltfbeauty](https://code4fukui.github.io/gltfbeauty/) is a tool to shlink the image size in the GLTF/GLB files to publish web (supports multiple files, no upload)
+[gltfbeauty](https://code4fukui.github.io/gltfbeauty/) is a tool to shlink the image size in the GLTF/GLB files to publish web (supports multiple files, no upload).
 
-[gltfbeauty](https://code4fukui.github.io/gltfbeauty/)は、大きなGLTF/GLBファイルをウェブ公開用に縮小するツールです（まとめて変換対応、サーバーに送信されません）
+## Demo
+[gltfbeauty](https://code4fukui.github.io/gltfbeauty/)
+
+## Features
+- Resize GLTF/GLB file textures to smaller size
+- Supports batch processing of multiple files
+- No file upload to server, all processing is done in the browser
+
+## Usage
+1. Open the web page in your browser.
+2. Drag and drop GLTF/GLB files or select a folder containing the files.
+3. Adjust the texture size, quality, and output format (GLTF or GLB) as needed.
+4. The processed files will be downloaded as a zip file.
 
 ## License
-
-- 作成者（Author）：[福野泰介 / Taisuke Fukuno](https://fukuno.jig.jp/)
-- GitHub：[@taisukef](https://github.com/taisukef)
-- ライセンス：MIT License
-
-## 履歴(History)
-
-- 改変内容（Changes made）:
-  - フォルダ選択からの読み込み機能を追加
-
-## 使用方法（How to Use）
-
-ブラウザで開いて、GLTF/GLBファイルをドロップするか、フォルダを選択してください。
-
-Open in your browser and either drop `.gltf` / `.glb` files or select a folder.
+MIT License
