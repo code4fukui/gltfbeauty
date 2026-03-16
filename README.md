@@ -2,13 +2,13 @@
 
 > 日本語のREADMEはこちらです: [README.ja.md](README.ja.md)
 
-[gltfbeauty](https://code4fukui.github.io/gltfbeauty/) is a tool to shrink the image size in the GLTF/GLB files to publish web (supports multiple files, no upload).
+gltfbeauty is a tool to shrink the image size in the GLTF/GLB files to publish on the web. It supports processing multiple files without uploading them to a server.
 
 ## Demo
 [gltfbeauty](https://code4fukui.github.io/gltfbeauty/)
 
 ## Features
-- Resize GLTF/GLB file textures to smaller size
+- Resize GLTF/GLB file textures to a smaller size
 - Supports batch processing of multiple files
 - No file upload to server, all processing is done in the browser
 
@@ -19,4 +19,4 @@
 4. The processed files will be downloaded as a zip file.
 
 ## License
-MIT License
+MIT License — see [LICENSE](LICENSE).
